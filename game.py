@@ -2,7 +2,7 @@ import streamlit as st
 import os
 from PIL import Image
 
-# Set webpage tab title and wide layout to fill the screen
+# Set webpage tab title and layout
 st.set_page_config(
     page_title="The Sleep Clinic Resident",
     page_icon="🩺",
@@ -107,7 +107,7 @@ st.markdown("""
         padding: 18px;
         color: #ECFDF5;
         font-family: 'Courier New', Courier, monospace;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
         box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
     }
     .speech-title-kasuya {
@@ -127,7 +127,7 @@ st.markdown("""
         padding: 15px;
         color: #FDF2F8;
         font-family: 'Courier New', Courier, monospace;
-        margin-bottom: 15px;
+        margin-bottom: 12px;
         box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
     }
     .speech-title-patient {
@@ -355,23 +355,22 @@ if st.session_state.game_state == "intro":
             st.session_state.selected_diagnosis = None
             st.rerun()
 
-# --- GAME SCREEN: CLINIC MAIN (3-COLUMN COHESIVE LAYOUT) ---
+# --- GAME SCREEN: CLINIC MAIN (STABLE 2-COLUMN DESIGN FOR WIDE & NARROW SCREENS) ---
 elif st.session_state.game_state == "clinic":
     case = CASES[st.session_state.case_num]
     
     # Progress Display
     st.markdown(f"""
     <div class="stats-box">
-        <span>📋 <b>Active Patient:</b> Patient {st.session_state.case_num}</span>
+        <span>🚪 <b>Active Patient:</b> Patient {st.session_state.case_num}</span>
         <span>🏆 <b>Class Score:</b> {st.session_state.score} / {st.session_state.case_num - 1} Correct</span>
     </div>
     """, unsafe_allow_html=True)
     
-    # 3-COLUMN COHESIVE LAYOUT:
-    # Column 1: Dr. Kasuya Portrait & Patient Chief Complaint
-    # Column 2: Dr. Kasuya guidance and Question / Diagnosis Buttons
-    # Column 3: The Patient Interview Q&A log (Side-by-side to prevent scrolling!)
-    col_left, col_mid, col_right = st.columns([1.0, 1.3, 1.5])
+    # 2-COLUMN STABLE DESIGN:
+    # Left Column (1/3 of screen): Dr. Kasuya Portrait + Presenting Case Details
+    # Right Column (2/3 of screen): Dr. Kasuya dialogue, Question controls, and the Patient Interview Log immediately beneath!
+    col_left, col_right = st.columns([1.0, 2.0])
     
     with col_left:
         if avatar:
@@ -379,15 +378,15 @@ elif st.session_state.game_state == "clinic":
         else:
             st.subheader("👨‍⚕️ Dr. Kasuya")
         
-        # Presenting case container (using clean, single HTML block to prevent auto-close)
+        # Presenting case container with high-contrast distinct slate-blue background
         st.markdown(f"""
         <div class="case-box">
-            <span style="color:#94A3B8; font-size:0.85rem; font-weight:bold; letter-spacing:1px; display:block; margin-bottom:5px;">📋 CURRENT PATIENT STATE:</span>
-            <span style="color:#F1F5F9; font-size:0.95rem; line-height:1.4;"><i>"{case['intro_desc']}"</i></span>
+            <span style="color:#38BDF8; font-size:0.9rem; font-weight:bold; letter-spacing:1px; display:block; margin-bottom:5px; font-family: monospace;">📋 CHIEF COMPLAINT:</span>
+            <span style="color:#F8FAFC; font-size:1.0rem; line-height:1.4; font-family: 'Courier New', monospace;"><i>"{case['intro_desc']}"</i></span>
         </div>
         """, unsafe_allow_html=True)
         
-    with col_mid:
+    with col_right:
         # --- PHASE 1: INTERVIEWING ---
         if st.session_state.phase == "interview":
             st.markdown(f"""
@@ -482,12 +481,14 @@ elif st.session_state.game_state == "clinic":
                     st.session_state.game_state = "summary"
                     st.rerun()
 
-    with col_right:
-        # Build the entire interview log HTML in Python first to guarantee no auto-closed div bugs
+        # --- THE LIVE PATIENT INTERVIEW LOG (PLACED IMMEDIATELY UNDER CONTROLS) ---
+        st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
+        
+        # Build the entire interview log HTML block with a distinct, high-contrast Slate-800 (#1E293B) background
         log_html = f"""
-        <div style="background-color:#0F172A; padding:20px; border-radius:12px; border:3px double #3B82F6; min-height:480px; font-family: 'Courier New', Courier, monospace;">
-            <h3 style="color:#60A5FA; margin-top:0; font-family: 'Courier New', Courier, monospace;">📋 PATIENT INTERVIEW LOG</h3>
-            <hr style="border-top: 1px solid #3B82F6; margin-bottom: 15px;">
+        <div style="background-color:#1E293B; padding:20px; border-radius:12px; border:3px double #3B82F6; font-family: 'Courier New', Courier, monospace; box-shadow: 0 4px 10px rgba(0,0,0,0.25);">
+            <h3 style="color:#60A5FA; margin-top:0; font-family: 'Courier New', Courier, monospace; letter-spacing:1px;">📋 PATIENT INTERVIEW LOG</h3>
+            <hr style="border-top: 1px solid #3B82F6; margin-bottom: 15px; opacity: 0.5;">
         """
         
         if len(st.session_state.questions_asked) > 0:
@@ -503,18 +504,18 @@ elif st.session_state.game_state == "clinic":
                 """
         else:
             log_html += """
-            <div style="text-align: center; color: #64748B; padding-top: 100px;">
-                <p style="font-size: 1.2rem;">🚪 No questions asked yet.</p>
-                <p>Click a trigger question in the middle column to interview the active patient!</p>
+            <div style="text-align: center; color: #94A3B8; padding: 40px 0; font-family: monospace;">
+                <p style="font-size: 1.1rem; margin: 0;">🚪 No questions asked yet.</p>
+                <p style="font-size: 0.9rem; color: #64748B; margin-top: 5px;">Click a trigger question above to begin interviewing the patient!</p>
             </div>
             """
             
         log_html += "</div>"
         
-        # Render the cohesive HTML block
+        # Render the cohesive HTML block right under the question controls
         st.markdown(log_html, unsafe_allow_html=True)
         
-        # Display the action button cleanly beneath the log container
+        # Display the "Move to Diagnosis" action button cleanly beneath the log container
         if len(st.session_state.questions_asked) >= 2 and st.session_state.phase == "interview":
             st.markdown("<div style='margin-top:15px;'>", unsafe_allow_html=True)
             if st.button("🚨 Move to Diagnosis", type="primary", use_container_width=True):
