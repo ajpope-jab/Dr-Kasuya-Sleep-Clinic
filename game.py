@@ -2,7 +2,7 @@ import streamlit as st
 import os
 from PIL import Image
 
-# Set webpage tab title and layout
+# Set webpage tab title and layout to wide to fill the screen
 st.set_page_config(
     page_title="The Sleep Clinic Resident",
     page_icon="🩺",
@@ -195,6 +195,13 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# Helper function to render HTML cleanly without leading spaces (stops the markdown-code-block bug!)
+def render_html(html_text):
+    cleaned_lines = []
+    for line in html_text.split("\n"):
+        cleaned_lines.append(line.strip())
+    st.markdown("\n".join(cleaned_lines), unsafe_allow_html=True)
+
 # Define the game database (with cleaned medical titles and clinical scenario focus)
 CASES = {
     1: {
@@ -307,12 +314,12 @@ def load_kasuya_avatar():
 avatar = load_kasuya_avatar()
 
 # HEADER
-st.markdown("""
+render_html("""
 <div class="game-header">
     <h1>THE SLEEP CLINIC RESIDENT</h1>
     <p>Clinical Practice Simulator with Dr. Kasuya</p>
 </div>
-""", unsafe_allow_html=True)
+""")
 
 # Sidebar with game control
 with st.sidebar:
@@ -337,15 +344,15 @@ if st.session_state.game_state == "intro":
             st.caption("[Missing Avatar Image]")
             
     with col2:
-        st.markdown(f"""
+        render_html(f"""
         <div class="speech-box-kasuya">
             <div class="speech-title-kasuya">Dr. Kasuya</div>
-            "Welcome to our sleep clinic, Resident! I'm Dr. Kasuya. <br><br>\
-            Crack open a cold soda, and let's get ready for our morning rounds.<br><br>\
-            We have three patients scheduled to come into the clinic today. Your job is to act as the lead clinical resident, interview them, and identify their correct primary sleep disorder.<br><br>\
+            "Welcome to our sleep clinic, Resident! I'm Dr. Kasuya.<br><br>
+            Crack open a cold soda, and let's get ready for our morning rounds.<br><br>
+            We have three patients scheduled to come into the clinic today. Your job is to act as the lead clinical resident, interview them, and identify their correct primary sleep disorder.<br><br>
             Let's see if you can get a perfect score! Ready to begin?"
         </div>
-        """, unsafe_allow_html=True)
+        """)
         
         if st.button("🎮 Start Clinic Shift", type="primary", use_container_width=True):
             st.session_state.game_state = "clinic"
@@ -355,11 +362,11 @@ if st.session_state.game_state == "intro":
             st.session_state.selected_diagnosis = None
             st.rerun()
 
-# --- GAME SCREEN: CLINIC MAIN (STABLE 2-COLUMN DESIGN FOR WIDE & NARROW SCREENS) ---
+# --- GAME SCREEN: CLINIC MAIN (SUPER-STABLE 2-COLUMN DESIGN FOR SCALAR WIDTHS) ---
 elif st.session_state.game_state == "clinic":
     case = CASES[st.session_state.case_num]
     
-    # Progress Display
+    # Progress Display using standard streamlit (safe from markdown formatting)
     st.markdown(f"""
     <div class="stats-box">
         <span>🚪 <b>Active Patient:</b> Patient {st.session_state.case_num}</span>
@@ -367,9 +374,7 @@ elif st.session_state.game_state == "clinic":
     </div>
     """, unsafe_allow_html=True)
     
-    # 2-COLUMN STABLE DESIGN:
-    # Left Column (1/3 of screen): Dr. Kasuya Portrait + Presenting Case Details
-    # Right Column (2/3 of screen): Dr. Kasuya dialogue, Question controls, and the Patient Interview Log immediately beneath!
+    # 2-COLUMN LAYOUT (Left = Doctor Portrait & Complaint, Right = Controls & Patient Responses)
     col_left, col_right = st.columns([1.0, 2.0])
     
     with col_left:
@@ -378,23 +383,23 @@ elif st.session_state.game_state == "clinic":
         else:
             st.subheader("👨‍⚕️ Dr. Kasuya")
         
-        # Presenting case container with high-contrast distinct slate-blue background
-        st.markdown(f"""
+        # Chief Complaint Panel (Safe, no-scrolling high-contrast box)
+        render_html(f"""
         <div class="case-box">
             <span style="color:#38BDF8; font-size:0.9rem; font-weight:bold; letter-spacing:1px; display:block; margin-bottom:5px; font-family: monospace;">📋 CHIEF COMPLAINT:</span>
             <span style="color:#F8FAFC; font-size:1.0rem; line-height:1.4; font-family: 'Courier New', monospace;"><i>"{case['intro_desc']}"</i></span>
         </div>
-        """, unsafe_allow_html=True)
+        """)
         
     with col_right:
         # --- PHASE 1: INTERVIEWING ---
         if st.session_state.phase == "interview":
-            st.markdown(f"""
+            render_html(f"""
             <div class="speech-box-kasuya">
                 <div class="speech-title-kasuya">Dr. Kasuya</div>
                 "{case['dr_kasuya_intro']}"
             </div>
-            """, unsafe_allow_html=True)
+            """)
             
             questions_remaining = 2 - len(st.session_state.questions_asked)
             st.markdown(f"💡 *Select up to **{questions_remaining}** trigger questions to ask:*")
@@ -411,16 +416,16 @@ elif st.session_state.game_state == "clinic":
 
         # --- PHASE 2: DIAGNOSING ---
         elif st.session_state.phase == "diagnose":
-            st.markdown(f"""
+            render_html(f"""
             <div class="speech-box-kasuya">
                 <div class="speech-title-kasuya">Dr. Kasuya</div>
                 "*Sips soda...* Excellent, we've gathered our two clinical clues! Based on the patient's symptoms, what is your official clinical diagnosis, Resident?"
             </div>
-            """, unsafe_allow_html=True)
+            """)
             
             st.markdown("🩺 **Submit your Diagnosis:**")
             
-            # Diagnosis buttons - clean string replacement to ensure syntactically valid unique keys
+            # Diagnosis buttons
             for diag_option in case['diagnoses']:
                 diag_key = diag_option.replace(" ", "_").replace("(", "").replace(")", "").replace("-", "_")
                 if st.button(diag_option, key=f"diag_{diag_key}", use_container_width=True):
@@ -437,34 +442,34 @@ elif st.session_state.game_state == "clinic":
             is_correct = (user_ans == correct_ans)
             
             if is_correct:
-                st.markdown(f"""
+                render_html(f"""
                 <div class="feedback-box-correct">
                     <h4><b>🎉 CORRECT DIAGNOSIS!</b></h4>
                     <p style="margin:0;"><b>Your choice:</b> {user_ans}</p>
                 </div>
-                """, unsafe_allow_html=True)
+                """)
                 
-                st.markdown(f"""
+                render_html(f"""
                 <div class="speech-box-kasuya">
                     <div class="speech-title-kasuya">Dr. Kasuya</div>
                     "{case['explanation_correct']}"
                 </div>
-                """, unsafe_allow_html=True)
+                """)
             else:
-                st.markdown(f"""
+                render_html(f"""
                 <div class="feedback-box-incorrect">
                     <h4><b>❌ DIAGNOSIS INCORRECT</b></h4>
-                    <p style="margin:0;"><b>Your choice:</b> {user_ans}<br>\
-                    <b>Correct diagnosis:</b> {correct_ans}</p>\
-                </div>\
-                """, unsafe_allow_html=True)
+                    <p style="margin:0;"><b>Your choice:</b> {user_ans}<br>
+                    <b>Correct diagnosis:</b> {correct_ans}</p>
+                </div>
+                """)
                 
-                st.markdown(f"""
+                render_html(f"""
                 <div class="speech-box-kasuya">
                     <div class="speech-title-kasuya">Dr. Kasuya</div>
                     "{case['explanation_incorrect']}"
                 </div>
-                """, unsafe_allow_html=True)
+                """)
                 
             st.markdown("---")
             
@@ -481,10 +486,10 @@ elif st.session_state.game_state == "clinic":
                     st.session_state.game_state = "summary"
                     st.rerun()
 
-        # --- THE LIVE PATIENT INTERVIEW LOG (PLACED IMMEDIATELY UNDER CONTROLS) ---
+        # --- THE LIVE PATIENT INTERVIEW LOG (PLACED DIRECTLY BENEATH CONTROLS) ---
         st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
         
-        # Build the entire interview log HTML block with a distinct, high-contrast Slate-800 (#1E293B) background
+        # Build raw HTML and render cleanly through render_html helper
         log_html = f"""
         <div style="background-color:#1E293B; padding:20px; border-radius:12px; border:3px double #3B82F6; font-family: 'Courier New', Courier, monospace; box-shadow: 0 4px 10px rgba(0,0,0,0.25);">
             <h3 style="color:#60A5FA; margin-top:0; font-family: 'Courier New', Courier, monospace; letter-spacing:1px;">📋 PATIENT INTERVIEW LOG</h3>
@@ -512,10 +517,9 @@ elif st.session_state.game_state == "clinic":
             
         log_html += "</div>"
         
-        # Render the cohesive HTML block right under the question controls
-        st.markdown(log_html, unsafe_allow_html=True)
+        render_html(log_html)
         
-        # Display the "Move to Diagnosis" action button cleanly beneath the log container
+        # Display the action button cleanly beneath the log container
         if len(st.session_state.questions_asked) >= 2 and st.session_state.phase == "interview":
             st.markdown("<div style='margin-top:15px;'>", unsafe_allow_html=True)
             if st.button("🚨 Move to Diagnosis", type="primary", use_container_width=True):
@@ -534,12 +538,12 @@ elif st.session_state.game_state == "summary":
             st.subheader("👨‍⚕️ Dr. Kasuya")
             
     with col2:
-        st.markdown(f"""
-        <div class="game-header" style="background-color: #0F172A; border-color: #10B981;">\
-            <h2>SHIFT SUMMARY</h2>\
-            <p style="color: #34D399; font-size: 1.2rem; font-weight: bold;">Final Score: {st.session_state.score} / 3 Correct Diagnoses</p>\
-        </div>\
-        """, unsafe_allow_html=True)
+        render_html(f"""
+        <div class="game-header" style="background-color: #0F172A; border-color: #10B981;">
+            <h2>SHIFT SUMMARY</h2>
+            <p style="color: #34D399; font-size: 1.2rem; font-weight: bold;">Final Score: {st.session_state.score} / 3 Correct Diagnoses</p>
+        </div>
+        """)
         
         # Determine feedback based on score
         if st.session_state.score == 3:
@@ -552,12 +556,12 @@ elif st.session_state.game_state == "summary":
             rating = "⭐ Med Student On Call"
             msg = "A great learning experience! Dr. Kasuya hands you a soda to boost your energy. 'The sleep world can be tricky, Resident. REM vs NREM parasomnias and secondary drug triggers take time to master. Keep reviewing your physiological pathways and you'll crush it next time!'"
             
-        st.markdown(f"""
+        render_html(f"""
         <div class="speech-box-kasuya">
             <div class="speech-title-kasuya">Dr. Kasuya ({rating})</div>
             "{msg}"
         </div>
-        """, unsafe_allow_html=True)
+        """)
         
         if st.button("🔄 Play Again", use_container_width=True):
             reset_game()
