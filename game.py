@@ -15,6 +15,61 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
     
+    /* Force dark-mode theme across the entire Streamlit App */
+    .stApp {
+        background-color: #0F172A !important;
+        color: #F1F5F9 !important;
+    }
+    
+    /* Make standard Streamlit sidebars match the dark console theme */
+    div[data-testid="stSidebar"] {
+        background-color: #1E293B !important;
+        border-right: 1px solid #475569;
+    }
+    
+    /* Style Streamlit buttons to feel like arcade console switches */
+    button[kind="secondary"] {
+        background-color: #1E293B !important;
+        color: #38BDF8 !important;
+        border: 2px solid #38BDF8 !important;
+        font-family: 'Courier New', monospace !important;
+        font-weight: bold !important;
+    }
+    button[kind="secondary"]:hover {
+        background-color: #38BDF8 !important;
+        color: #0F172A !important;
+        box-shadow: 0 0 12px #38BDF8 !important;
+    }
+    
+    /* Style primary (CTA) buttons */
+    button[kind="primary"] {
+        background-color: #F43F5E !important;
+        color: #FFFFFF !important;
+        border: 2px solid #F43F5E !important;
+        font-family: 'Courier New', monospace !important;
+        font-weight: bold !important;
+    }
+    button[kind="primary"]:hover {
+        background-color: #FFFFFF !important;
+        color: #F43F5E !important;
+        box-shadow: 0 0 12px #F43F5E !important;
+    }
+
+    /* Style disabled buttons to show they have been clicked */
+    button:disabled {
+        background-color: #1E293B !important;
+        color: #64748B !important;
+        border: 2px solid #334155 !important;
+        opacity: 0.65;
+    }
+
+    /* Style the image container border */
+    [data-testid="stImage"] img {
+        border: 3px solid #3B82F6 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.35) !important;
+    }
+
     .retro-font {
         font-family: 'Courier New', Courier, monospace;
     }
@@ -46,18 +101,18 @@ st.markdown("""
 
     /* Dr. Kasuya's Speech Box */
     .speech-box-kasuya {
-        background-color: #ECFDF5;
+        background-color: #064E3B;
         border: 3px solid #10B981;
         border-radius: 12px;
         padding: 18px;
-        color: #064E3B;
+        color: #ECFDF5;
         font-family: 'Courier New', Courier, monospace;
         margin-bottom: 20px;
-        box-shadow: 2px 2px 8px rgba(0,0,0,0.05);
+        box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
     }
     .speech-title-kasuya {
         font-weight: bold;
-        color: #047857;
+        color: #34D399;
         font-size: 1.1rem;
         margin-bottom: 5px;
         text-transform: uppercase;
@@ -66,18 +121,18 @@ st.markdown("""
 
     /* Patient Speech Box */
     .speech-box-patient {
-        background-color: #FDF2F8;
+        background-color: #500724;
         border: 3px solid #EC4899;
         border-radius: 12px;
         padding: 15px;
-        color: #500724;
+        color: #FDF2F8;
         font-family: 'Courier New', Courier, monospace;
         margin-bottom: 15px;
-        box-shadow: 2px 2px 8px rgba(0,0,0,0.05);
+        box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
     }
     .speech-title-patient {
         font-weight: bold;
-        color: #BE185D;
+        color: #F472B6;
         font-size: 1.0rem;
         margin-bottom: 5px;
         text-transform: uppercase;
@@ -86,43 +141,55 @@ st.markdown("""
 
     /* Feedback Speech Box */
     .feedback-box-correct {
-        background-color: #F0FDF4;
+        background-color: #14532D;
         border: 3px solid #22C55E;
         border-radius: 12px;
         padding: 18px;
-        color: #14532D;
+        color: #F0FDF4;
         font-family: 'Courier New', Courier, monospace;
         margin-bottom: 20px;
     }
     .feedback-box-incorrect {
-        background-color: #FEF2F2;
+        background-color: #7F1D1D;
         border: 3px solid #EF4444;
         border-radius: 12px;
         padding: 18px;
-        color: #7F1D1D;
+        color: #FEF2F2;
         font-family: 'Courier New', Courier, monospace;
         margin-bottom: 20px;
     }
 
     /* Progress and Stats Box */
     .stats-box {
-        background-color: #F1F5F9;
-        border: 2px solid #CBD5E1;
+        background-color: #1E293B;
+        border: 2px solid #475569;
         border-radius: 8px;
         padding: 10px 15px;
+        color: #E2E8F0;
         font-family: 'Courier New', Courier, monospace;
         margin-bottom: 20px;
         display: flex;
         justify-content: space-between;
     }
 
+    /* Patient Presenting State Box */
+    .case-box {
+        background-color: #1E293B;
+        padding: 15px;
+        border-radius: 10px;
+        border: 2px solid #475569;
+        margin-top: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
     /* Retro style custom list */
     .retro-hint-box {
-        background-color: #EFF6FF;
+        background-color: #1E3A8A;
         border-left: 5px solid #3B82F6;
         padding: 10px 15px;
         border-radius: 4px;
         margin-bottom: 10px;
+        color: #EFF6FF;
         font-family: 'Courier New', Courier, monospace;
     }
 </style>
@@ -273,7 +340,10 @@ if st.session_state.game_state == "intro":
         st.markdown(f"""
         <div class="speech-box-kasuya">
             <div class="speech-title-kasuya">Dr. Kasuya</div>
-            "Welcome to our sleep clinic, Resident! I'm Dr. Kasuya. \n            Crack open a cold soda, and let's get ready for our morning rounds.<br><br>\n            We have three patients scheduled to come into the clinic today. Your job is to act as the lead clinical resident, interview them, and identify their correct primary sleep disorder.<br><br>\n            Let's see if you can get a perfect score! Ready to begin?"
+            "Welcome to our sleep clinic, Resident! I'm Dr. Kasuya. <br><br>\
+            Crack open a cold soda, and let's get ready for our morning rounds.<br><br>\
+            We have three patients scheduled to come into the clinic today. Your job is to act as the lead clinical resident, interview them, and identify their correct primary sleep disorder.<br><br>\
+            Let's see if you can get a perfect score! Ready to begin?"
         </div>
         """, unsafe_allow_html=True)
         
@@ -297,22 +367,23 @@ elif st.session_state.game_state == "clinic":
     </div>
     """, unsafe_allow_html=True)
     
-    # NEW 3-COLUMN COHESIVE LAYOUT:
+    # 3-COLUMN COHESIVE LAYOUT:
     # Column 1: Dr. Kasuya Portrait & Patient Chief Complaint
     # Column 2: Dr. Kasuya guidance and Question / Diagnosis Buttons
     # Column 3: The Patient Interview Q&A log (Side-by-side to prevent scrolling!)
     col_left, col_mid, col_right = st.columns([1.0, 1.3, 1.5])
     
     with col_left:
-        st.markdown("<div style='background-color:#1E293B; padding:15px; border-radius:10px; border:2px solid #475569;'>", unsafe_allow_html=True)
         if avatar:
             st.image(avatar, use_container_width=True)
         else:
             st.subheader("👨‍⚕️ Dr. Kasuya")
         
+        # Presenting case container (using clean, single HTML block to prevent auto-close)
         st.markdown(f"""
-        <p style="color:#94A3B8; font-size:0.9rem; font-family: 'Courier New', monospace; margin: 10px 0 2px 0;"><b>PRESENTING CASE:</b></p>
-        <p style="color:#F1F5F9; font-family: 'Courier New', monospace; font-size:1.0rem;"><i>{case['intro_desc']}</i></p>
+        <div class="case-box">
+            <span style="color:#94A3B8; font-size:0.85rem; font-weight:bold; letter-spacing:1px; display:block; margin-bottom:5px;">📋 CURRENT PATIENT STATE:</span>
+            <span style="color:#F1F5F9; font-size:0.95rem; line-height:1.4;"><i>"{case['intro_desc']}"</i></span>
         </div>
         """, unsafe_allow_html=True)
         
@@ -350,9 +421,10 @@ elif st.session_state.game_state == "clinic":
             
             st.markdown("🩺 **Submit your Diagnosis:**")
             
-            # Diagnosis buttons
+            # Diagnosis buttons - clean string replacement to ensure syntactically valid unique keys
             for diag_option in case['diagnoses']:
-                if st.button(diag_option, key=f"diag_{diag_option}", use_container_width=True):
+                diag_key = diag_option.replace(" ", "_").replace("(", "").replace(")", "").replace("-", "_")
+                if st.button(diag_option, key=f"diag_{diag_key}", use_container_width=True):
                     st.session_state.selected_diagnosis = diag_option
                     st.session_state.phase = "feedback"
                     if diag_option == case['correct_answer']:
@@ -383,9 +455,9 @@ elif st.session_state.game_state == "clinic":
                 st.markdown(f"""
                 <div class="feedback-box-incorrect">
                     <h4><b>❌ DIAGNOSIS INCORRECT</b></h4>
-                    <p style="margin:0;"><b>Your choice:</b> {user_ans}<br>
-                    <b>Correct diagnosis:</b> {correct_ans}</p>
-                </div>
+                    <p style="margin:0;"><b>Your choice:</b> {user_ans}<br>\
+                    <b>Correct diagnosis:</b> {correct_ans}</p>\
+                </div>\
                 """, unsafe_allow_html=True)
                 
                 st.markdown(f"""
@@ -411,40 +483,44 @@ elif st.session_state.game_state == "clinic":
                     st.rerun()
 
     with col_right:
-        st.markdown("<div style='background-color:#0F172A; padding:20px; border-radius:12px; border:3px double #3B82F6; min-height:480px;'>", unsafe_allow_html=True)
-        st.markdown("<h3 style='color:#60A5FA; margin-top:0; font-family: monospace;'>📋 PATIENT INTERVIEW LOG</h3>", unsafe_allow_html=True)
-        st.markdown("---")
+        # Build the entire interview log HTML in Python first to guarantee no auto-closed div bugs
+        log_html = f"""
+        <div style="background-color:#0F172A; padding:20px; border-radius:12px; border:3px double #3B82F6; min-height:480px; font-family: 'Courier New', Courier, monospace;">
+            <h3 style="color:#60A5FA; margin-top:0; font-family: 'Courier New', Courier, monospace;">📋 PATIENT INTERVIEW LOG</h3>
+            <hr style="border-top: 1px solid #3B82F6; margin-bottom: 15px;">
+        """
         
-        # Display the patient's answers to the right, side-by-side!
         if len(st.session_state.questions_asked) > 0:
             for q_idx in st.session_state.questions_asked:
                 asked_q = case['questions'][q_idx]
                 patient_ans = case['answers'][q_idx]
                 
-                st.markdown(f"""
+                log_html += f"""
                 <div class="speech-box-patient">
                     <div class="speech-title-patient">Asked: "{asked_q}"</div>
                     "{patient_ans}"
                 </div>
-                """, unsafe_allow_html=True)
-            
-            # Prompt to diagnose once 2 questions are asked
-            if len(st.session_state.questions_asked) >= 2 and st.session_state.phase == "interview":
-                st.markdown("<div style='margin-top:20px;'>", unsafe_allow_html=True)
-                st.success("Sufficient diagnostic evidence has been recorded in the log!")
-                if st.button("🚨 Move to Diagnosis", type="primary", use_container_width=True):
-                    st.session_state.phase = "diagnose"
-                    st.rerun()
-                st.markdown("</div>", unsafe_allow_html=True)
+                """
         else:
-            st.markdown("""
-            <div style="text-align: center; color: #64748B; font-family: monospace; padding-top: 100px;">
+            log_html += """
+            <div style="text-align: center; color: #64748B; padding-top: 100px;">
                 <p style="font-size: 1.2rem;">🚪 No questions asked yet.</p>
                 <p>Click a trigger question in the middle column to interview the active patient!</p>
             </div>
-            """, unsafe_allow_html=True)
+            """
             
-        st.markdown("</div>", unsafe_allow_html=True)
+        log_html += "</div>"
+        
+        # Render the cohesive HTML block
+        st.markdown(log_html, unsafe_allow_html=True)
+        
+        # Display the action button cleanly beneath the log container
+        if len(st.session_state.questions_asked) >= 2 and st.session_state.phase == "interview":
+            st.markdown("<div style='margin-top:15px;'>", unsafe_allow_html=True)
+            if st.button("🚨 Move to Diagnosis", type="primary", use_container_width=True):
+                st.session_state.phase = "diagnose"
+                st.rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
 
 # --- GAME SCREEN: SUMMARY / OUTRO ---
 elif st.session_state.game_state == "summary":
@@ -458,10 +534,10 @@ elif st.session_state.game_state == "summary":
             
     with col2:
         st.markdown(f"""
-        <div class="game-header" style="background-color: #0F172A; border-color: #10B981;">
-            <h2>SHIFT SUMMARY</h2>
-            <p style="color: #34D399; font-size: 1.2rem; font-weight: bold;">Final Score: {st.session_state.score} / 3 Correct Diagnoses</p>
-        </div>
+        <div class="game-header" style="background-color: #0F172A; border-color: #10B981;">\
+            <h2>SHIFT SUMMARY</h2>\
+            <p style="color: #34D399; font-size: 1.2rem; font-weight: bold;">Final Score: {st.session_state.score} / 3 Correct Diagnoses</p>\
+        </div>\
         """, unsafe_allow_html=True)
         
         # Determine feedback based on score
